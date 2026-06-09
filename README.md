@@ -49,13 +49,13 @@ print. Data is always current — new animals and photos appear automatically.
 
 ## Notes
 
-- The tool lists **all** published animals (including adopted and past ones).
-  To limit it, add a `tax_query` on the `status` taxonomy in
-  `simabo_all_animals()`.
-- Empty fields (e.g. missing birth date or status) are hidden automatically.
-- **Photo framing**: defaults to `object-fit: cover` (fills the frame, may crop
-  edges). For the whole photo with white borders, change that line to
-  `object-fit: contain`.
+- The site is multilingual (WPML); `simabo_all_animals()` keeps only the
+  **English** version of each animal. To also filter by adoption status, add a
+  `tax_query` on the `status` taxonomy there.
+- Birth is reduced to the **year** only (`simabo_year()`).
+- Empty fields (e.g. missing birth or status) are hidden automatically.
+- **Photo framing**: `object-fit: contain` (whole photo, white borders). For a
+  filled frame that may crop edges, change that line to `object-fit: cover`.
 - If a caching plugin serves stale data, purge the cache for `/animal-cards`.
 
 ## Files

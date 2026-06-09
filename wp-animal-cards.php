@@ -61,6 +61,11 @@ function simabo_terms($post_id, $taxonomy) {
     return (!is_wp_error($terms) && $terms) ? implode(', ', $terms) : '';
 }
 
+/** Reduce any birth value ("10/10/2010", "20101010", ...) to the year only. */
+function simabo_year($val) {
+    return ($val && preg_match('/(?:19|20)\d{2}/', $val, $m)) ? $m[0] : $val;
+}
+
 function simabo_animal_payload($post) {
     $id    = $post->ID;
     $map   = simabo_collect_fields($id);
@@ -75,14 +80,14 @@ function simabo_animal_payload($post) {
         'species' => simabo_terms($id, 'species'),
         'image'   => $image ? $image : '',
         'sex'     => simabo_pick($map, array('sex', 'gender', 'sesso')),
-        'birth'   => simabo_pick($map, array('age', 'birth', 'date_of_birth', 'dob', 'birthday', 'data_di_nascita', 'nascita')),
+        'birth'   => simabo_year(simabo_pick($map, array('age', 'birth', 'date_of_birth', 'dob', 'birthday', 'data_di_nascita', 'nascita'))),
         'size'    => simabo_pick($map, array('size', 'taglia')),
         'status'  => simabo_terms($id, 'status'),
         'bio'     => simabo_pick($map, array('story', 'bio', 'biography', 'description', 'about', 'storia', 'descrizione')),
     );
 }
 
-/** All published animals, alphabetical, as an array of records. */
+/** All published animals, English only (WPML), alphabetical. */
 function simabo_all_animals() {
     $posts = get_posts(array(
         'post_type'      => 'animal',
@@ -90,8 +95,21 @@ function simabo_all_animals() {
         'post_status'    => 'publish',
         'orderby'        => 'title',
         'order'          => 'ASC',
+        'suppress_filters' => false, // let WPML scope the query to the current language
     ));
-    return array_map('simabo_animal_payload', $posts);
+
+    // The site is multilingual (WPML): each animal exists in several languages.
+    // Keep only the English version of each.
+    $english = array();
+    foreach ($posts as $p) {
+        $lang = apply_filters('wpml_post_language_details', null, $p->ID);
+        if (is_array($lang) && !empty($lang['language_code'])) {
+            if ($lang['language_code'] === 'en') $english[] = $p;
+        } else {
+            $english[] = $p; // WPML unavailable -> keep
+        }
+    }
+    return array_map('simabo_animal_payload', $english);
 }
 
 /* =========================================================================
@@ -171,20 +189,20 @@ function simabo_cards_template() {
   .logo{background:var(--teal);text-align:center;padding:7mm 0 6mm;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   .logo img{height:13mm;width:auto;}
   .photo{height:108mm;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-  .photo img{width:100%;height:100%;object-fit:cover;object-position:center;}
+  .photo img{width:100%;height:100%;object-fit:contain;object-position:center;}
   .photo .placeholder{color:#bcbcbc;font-size:14px;}
-  .name{background:var(--name-band);text-align:center;padding:6mm 6mm 7mm;border:3px solid #2f6b41;margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  .name span{font-family:"Caveat",cursive;font-size:54px;line-height:1;color:var(--name-text);font-weight:700;}
+  .name{background:#fff;text-align:center;padding:5mm 6mm;margin:0;}
+  .name span{font-family:"Caveat",cursive;font-size:54px;line-height:1;color:#111;font-weight:700;}
   .details{padding:5mm 7mm 3mm;}
   .row{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid #eef2f2;font-size:15px;}
   .row:last-child{border-bottom:none;}
-  .row .k{font-weight:700;min-width:42mm;}
-  .row .v{color:#3a3b3d;}
-  .bio{background:var(--bio-bg);color:var(--ink);margin:4mm 0 0;padding:6mm 7mm;font-size:14px;line-height:1.5;flex:0 0 auto;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .row .k{font-weight:700;min-width:42mm;color:#111;}
+  .row .v{color:#111;}
+  .bio{background:#fff;color:#111;margin:0;padding:2mm 7mm;font-size:14px;line-height:1.5;flex:0 0 auto;}
   .bio p{margin:0 0 8px;}
   .bio p:last-child{margin-bottom:0;}
   .footer{margin-top:auto;padding:5mm 7mm 6mm;font-size:13px;line-height:1.5;}
-  .footer .support{color:var(--bio-text);font-style:italic;font-weight:500;}
+  .footer .support{color:#111;font-style:italic;font-weight:500;}
   .footer .email{font-style:italic;}
   .footer a{color:inherit;text-decoration:none;}
   @page{size:A4 portrait;margin:0;}
