@@ -39,10 +39,10 @@ new animals and photos appear automatically.
    - https://simabo.org/wp-json/simabo/v1/animals
    - https://simabo.org/wp-json/simabo/v1/animals?slug=nancy
 
-   Each record carries a temporary `_keys` array (the available custom-field
-   names). If `sex` / `birth` / `size` / `status` / `bio` come back empty,
-   match the real key from `_keys` into the alias lists in `wp-endpoint.php`
-   (function `simabo_pick(...)`), then remove the `_keys` line.
+   Field mapping for the Simabo `animal` CPT: `species` and `status` are
+   taxonomies; `sex`, `size`, birth (ACF field `age`) and bio (ACF field
+   `story`) are custom fields. If a future field is renamed, adjust the alias
+   lists in `wp-endpoint.php` (function `simabo_pick(...)`).
 3. The GitHub Pages site (`index.html`) points at the endpoint via the
    `ENDPOINT` constant — no other configuration needed.
 

@@ -71,10 +71,15 @@ function simabo_pick($map, $aliases) {
     return '';
 }
 
+/** Comma-joined names of the terms a post has in a taxonomy. */
+function simabo_terms($post_id, $taxonomy) {
+    $terms = wp_get_post_terms($post_id, $taxonomy, array('fields' => 'names'));
+    return (!is_wp_error($terms) && $terms) ? implode(', ', $terms) : '';
+}
+
 function simabo_animal_payload($post) {
     $id     = $post->ID;
     $map    = simabo_collect_fields($id);
-    $terms  = wp_get_post_terms($id, 'species', array('fields' => 'names'));
     $image  = get_the_post_thumbnail_url($id, 'large');
     if (!$image) $image = get_the_post_thumbnail_url($id, 'full');
 
@@ -83,15 +88,13 @@ function simabo_animal_payload($post) {
         'name'    => html_entity_decode(get_the_title($id), ENT_QUOTES),
         'slug'    => $post->post_name,
         'link'    => get_permalink($id),
-        'species' => (!is_wp_error($terms) && $terms) ? $terms[0] : '',
+        'species' => simabo_terms($id, 'species'),
         'image'   => $image ? $image : '',
         'sex'     => simabo_pick($map, array('sex', 'gender', 'sesso')),
-        'birth'   => simabo_pick($map, array('birth', 'date_of_birth', 'dob', 'birthday', 'birth_date', 'data_di_nascita', 'nascita')),
+        'birth'   => simabo_pick($map, array('age', 'birth', 'date_of_birth', 'dob', 'birthday', 'birth_date', 'data_di_nascita', 'nascita')),
         'size'    => simabo_pick($map, array('size', 'taglia')),
-        'status'  => simabo_pick($map, array('status', 'stato', 'adoption_status')),
-        'bio'     => simabo_pick($map, array('bio', 'biography', 'description', 'story', 'about', 'storia', 'descrizione', 'presentazione')),
-        // TEMP: lists available field names so the mapping above can be verified.
-        '_keys'   => array_keys($map),
+        'status'  => simabo_terms($id, 'status'),
+        'bio'     => simabo_pick($map, array('story', 'bio', 'biography', 'description', 'about', 'storia', 'descrizione', 'presentazione')),
     );
 }
 
