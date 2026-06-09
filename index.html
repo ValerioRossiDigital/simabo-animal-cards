@@ -85,6 +85,7 @@
 <body>
 <div class="toolbar">
   <h1>Si<span>ma</span>bo · Animal Cards</h1>
+  <select id="statusFilter" aria-label="Filter by status"></select>
   <select id="picker" aria-label="Choose an animal"><option>Loading…</option></select>
   <button id="printBtn" type="button" disabled>Print / Save PDF</button>
   <span class="meta" id="meta">Loading animals…</span>
@@ -117,13 +118,15 @@
 (function(){
   const ENDPOINT = "https://simabo.org/wp-json/simabo/v1/animals";
   const picker=document.getElementById('picker');
+  const statusFilter=document.getElementById('statusFilter');
   const meta=document.getElementById('meta');
   const printBtn=document.getElementById('printBtn');
-  let DATA=[];
+  let DATA=[], VIEW=[];
 
   function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
   function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
   function cell(label,v){return v?`<div class="cell"><dt>${label}</dt><dd>${esc(cap(v))}</dd></div>`:'';}
+  function statusesOf(a){return a.status?String(a.status).split(/,\s*/).filter(Boolean):[];}
 
   function fit(){
     const card=document.querySelector('.card');
@@ -154,9 +157,27 @@
     fit();
   }
 
+  function fillStatusFilter(){
+    const set=new Set(); let hasNone=false;
+    DATA.forEach(a=>{const s=statusesOf(a); s.length?s.forEach(x=>set.add(x)):hasNone=true;});
+    let opts='<option value="all">All statuses</option>';
+    [...set].sort((a,b)=>a.localeCompare(b)).forEach(s=>opts+=`<option value="${esc(s)}">${esc(s)}</option>`);
+    if(hasNone) opts+='<option value="__none__">(no status)</option>';
+    statusFilter.innerHTML=opts;
+  }
+
   function fillPicker(){
     picker.innerHTML='';
-    DATA.forEach((a,i)=>{const o=document.createElement('option');o.value=i;o.textContent=a.species?`${a.name} · ${a.species}`:a.name;picker.appendChild(o);});
+    VIEW.forEach((a,i)=>{const o=document.createElement('option');o.value=i;o.textContent=a.species?`${a.name} · ${a.species}`:a.name;picker.appendChild(o);});
+  }
+
+  function applyFilter(){
+    const f=statusFilter.value;
+    VIEW = f==='all' ? DATA
+      : DATA.filter(a=>{const s=statusesOf(a); return f==='__none__'?s.length===0:s.includes(f);});
+    fillPicker();
+    meta.textContent=`${VIEW.length} of ${DATA.length} animals · live`;
+    if(VIEW.length) render(VIEW[0]);
   }
 
   async function load(){
@@ -167,11 +188,10 @@
       DATA=Array.isArray(json)?json:(json.animals||[]);
       if(!DATA.length) throw new Error('empty response');
       DATA.sort((a,b)=>(a.name||'').toLowerCase().localeCompare((b.name||'').toLowerCase()));
-      fillPicker();
+      fillStatusFilter();
+      applyFilter();
       printBtn.disabled=false;
       meta.classList.remove('error');
-      meta.textContent=`${DATA.length} animals · live`;
-      render(DATA[0]);
       if(document.fonts&&document.fonts.ready){document.fonts.ready.then(fit);}
     }catch(err){
       meta.classList.add('error');
@@ -180,7 +200,8 @@
     }
   }
 
-  picker.addEventListener('change',()=>render(DATA[picker.value]));
+  statusFilter.addEventListener('change',applyFilter);
+  picker.addEventListener('change',()=>render(VIEW[picker.value]));
   printBtn.addEventListener('click',()=>window.print());
   window.addEventListener('beforeprint',fit);
   load();

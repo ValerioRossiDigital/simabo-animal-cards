@@ -263,6 +263,7 @@ function simabo_cards_template() {
 <body>
 <div class="toolbar">
   <h1>Si<span>ma</span>bo · Animal Cards</h1>
+  <select id="statusFilter" aria-label="Filter by status"></select>
   <select id="picker" aria-label="Choose an animal"></select>
   <button id="printBtn" type="button" disabled>Print / Save PDF</button>
   <span class="meta" id="meta"></span>
@@ -297,12 +298,15 @@ function simabo_cards_template() {
   const DATA = (window.SIMABO_ANIMALS || []).slice()
     .sort((a,b)=>(a.name||'').toLowerCase().localeCompare((b.name||'').toLowerCase()));
   const picker=document.getElementById('picker');
+  const statusFilter=document.getElementById('statusFilter');
   const meta=document.getElementById('meta');
   const printBtn=document.getElementById('printBtn');
+  let VIEW=DATA;
 
   function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
   function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
   function cell(label,v){return v?`<div class="cell"><dt>${label}</dt><dd>${esc(cap(v))}</dd></div>`:'';}
+  function statusesOf(a){return a.status?String(a.status).split(/,\s*/).filter(Boolean):[];}
 
   function render(a){
     if(!a) return;
@@ -340,13 +344,36 @@ function simabo_cards_template() {
     }
   }
 
+  function fillStatusFilter(){
+    const set=new Set(); let hasNone=false;
+    DATA.forEach(a=>{const s=statusesOf(a); s.length?s.forEach(x=>set.add(x)):hasNone=true;});
+    let opts='<option value="all">All statuses</option>';
+    [...set].sort((a,b)=>a.localeCompare(b)).forEach(s=>opts+=`<option value="${esc(s)}">${esc(s)}</option>`);
+    if(hasNone) opts+='<option value="__none__">(no status)</option>';
+    statusFilter.innerHTML=opts;
+  }
+
+  function fillPicker(){
+    picker.innerHTML='';
+    VIEW.forEach((a,i)=>{const o=document.createElement('option');o.value=i;o.textContent=a.species?`${a.name} · ${a.species}`:a.name;picker.appendChild(o);});
+  }
+
+  function applyFilter(){
+    const f=statusFilter.value;
+    VIEW = f==='all' ? DATA
+      : DATA.filter(a=>{const s=statusesOf(a); return f==='__none__'?s.length===0:s.includes(f);});
+    fillPicker();
+    meta.textContent=`${VIEW.length} of ${DATA.length} animals · live`;
+    if(VIEW.length) render(VIEW[0]);
+  }
+
   if(!DATA.length){meta.classList.add('error');meta.textContent='No animals found.';return;}
-  DATA.forEach((a,i)=>{const o=document.createElement('option');o.value=i;o.textContent=a.species?`${a.name} · ${a.species}`:a.name;picker.appendChild(o);});
+  fillStatusFilter();
+  applyFilter();
   printBtn.disabled=false;
-  meta.textContent=`${DATA.length} animals · live`;
-  picker.addEventListener('change',()=>render(DATA[picker.value]));
+  statusFilter.addEventListener('change',applyFilter);
+  picker.addEventListener('change',()=>render(VIEW[picker.value]));
   printBtn.addEventListener('click',()=>window.print());
-  render(DATA[0]);
   if(document.fonts&&document.fonts.ready){document.fonts.ready.then(fit);}
   window.addEventListener('beforeprint',fit);
 })();
