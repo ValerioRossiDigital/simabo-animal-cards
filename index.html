@@ -6,7 +6,7 @@
 <title>Simabo · Animal Cards</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --teal:#5FB6B1; --teal-deep:#2f8a84; --teal-ink:#1f5f5b;
@@ -16,7 +16,7 @@
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
-  body{font-family:"DM Sans",system-ui,sans-serif;color:var(--ink);background:#d7ecea;}
+  body{font-family:"Roboto",system-ui,sans-serif;color:var(--ink);background:#d7ecea;}
 
   .toolbar{position:sticky;top:0;z-index:10;display:flex;gap:12px;align-items:center;flex-wrap:wrap;
     padding:14px 22px;background:#fff;border-bottom:1px solid #e3eeed;box-shadow:0 2px 14px rgba(0,0,0,.05);}
@@ -51,8 +51,8 @@
   .portrait .ph{color:#aac6c3;font-size:14px;letter-spacing:.5px;}
 
   .ident{padding:7mm 8mm 3mm;}
-  .name{font-family:"Fraunces",serif;font-optical-sizing:auto;font-weight:600;font-style:italic;
-    font-size:46px;line-height:.95;letter-spacing:-.5px;color:var(--ink);margin:0;}
+  .name{font-family:"Lato",sans-serif;font-weight:900;
+    font-size:44px;line-height:1;letter-spacing:-.5px;color:var(--ink);margin:0;}
   .rule{width:54px;height:4px;background:var(--gold);border-radius:3px;margin:4mm 0 0;
     -webkit-print-color-adjust:exact;print-color-adjust:exact;}
 
@@ -64,18 +64,12 @@
   .story{padding:4mm 8mm 5mm;flex:1 1 auto;font-size:13.5px;line-height:1.62;color:#33403e;}
   .story p{margin:0 0 9px;}
   .story p:last-child{margin-bottom:0;}
-  .story p:first-of-type::first-letter{font-family:"Fraunces",serif;font-weight:600;font-style:italic;
-    font-size:3.1em;line-height:.74;float:left;margin:3px 9px 0 0;color:var(--teal-deep);}
 
-  .cta{margin-top:auto;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:space-between;
-    gap:6mm;padding:6mm 8mm;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  .cta .left{display:flex;align-items:center;gap:4mm;min-width:0;}
-  .cta .heart{font-size:24px;color:var(--coral);line-height:1;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  .cta .lead{font-family:"Fraunces",serif;font-style:italic;font-weight:600;font-size:18px;line-height:1.1;}
-  .cta .url{display:block;font-size:11.5px;color:rgba(255,255,255,.85);letter-spacing:.2px;margin-top:1mm;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:95mm;}
-  .cta .mail{text-align:right;font-size:11px;line-height:1.5;color:rgba(255,255,255,.92);flex:0 0 auto;}
-  .cta .mail b{display:block;font-size:12.5px;color:#fff;}
+  .cta{margin-top:auto;background:var(--teal);color:#fff;display:flex;align-items:center;
+    gap:3mm;padding:4mm 8mm;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .cta .heart{font-size:18px;color:var(--coral);line-height:1;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .cta .lead{font-family:"Lato",sans-serif;font-weight:700;font-size:15px;line-height:1.1;}
+  .cta .url{font-size:11.5px;color:rgba(255,255,255,.88);letter-spacing:.2px;margin-left:1mm;}
   .cta a{color:inherit;text-decoration:none;}
 
   @page{size:A4 portrait;margin:0;}
@@ -111,14 +105,9 @@
       </section>
       <section class="story" id="story"></section>
       <footer class="cta">
-        <div class="left">
-          <span class="heart">&#9829;</span>
-          <div>
-            <span class="lead" id="lead">Sponsor me</span>
-            <a class="url" id="url" href="#"></a>
-          </div>
-        </div>
-        <div class="mail">write to<br><b><a href="mailto:info@simabo.org">info@simabo.org</a></b></div>
+        <span class="heart">&#9829;</span>
+        <span class="lead" id="lead">Sponsor me</span>
+        <a class="url" id="url" href="#"></a>
       </footer>
     </div>
   </div>
