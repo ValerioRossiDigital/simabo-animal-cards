@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simabo · Animal Cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --teal:#65BBB6;
+    --name-band:#9ed6a0;
+    --name-text:#3f7d53;
+    --bio-bg:#e8f4ea;
+    --bio-text:#3f7d53;
+    --ink:#2A2B2D;
+    --line:#e3e3e3;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"DM Sans",system-ui,sans-serif;
+    color:var(--ink);
+    background:#cfe7e5;
+  }
+
+  /* ---- Toolbar (screen only) ---- */
+  .toolbar{
+    position:sticky;top:0;z-index:10;
+    display:flex;gap:12px;align-items:center;flex-wrap:wrap;
+    padding:14px 20px;background:#fff;border-bottom:1px solid var(--line);
+    box-shadow:0 2px 10px rgba(0,0,0,.06);
+  }
+  .toolbar h1{font-size:15px;margin:0 12px 0 0;font-weight:700;letter-spacing:.2px;}
+  .toolbar h1 span{color:var(--teal);}
+  .toolbar select{
+    font-family:inherit;font-size:14px;padding:8px 12px;
+    border:1px solid #cdd6d6;border-radius:8px;background:#fff;min-width:240px;
+  }
+  .toolbar button{
+    font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;
+    padding:9px 18px;border:none;border-radius:8px;color:#fff;background:var(--teal);
+  }
+  .toolbar button:disabled{opacity:.5;cursor:default;}
+  .toolbar button:not(:disabled):hover{filter:brightness(.95);}
+  .toolbar .meta{font-size:12px;color:#7a8585;margin-left:auto;}
+  .toolbar .meta.error{color:#c0392b;font-weight:600;}
+
+  .stage{display:flex;justify-content:center;padding:24px 16px 60px;}
+
+  /* ---- A4 card ---- */
+  .card{
+    width:210mm;min-height:297mm;background:var(--teal);
+    padding:9mm;display:flex;flex-direction:column;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+    box-shadow:0 8px 30px rgba(0,0,0,.18);
+  }
+  .sheet{
+    background:#fff;flex:1;display:flex;flex-direction:column;
+    border:2px solid #fff;overflow:hidden;
+  }
+
+  .logo{
+    background:var(--teal);text-align:center;padding:7mm 0 6mm;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  .logo img{height:13mm;width:auto;}
+
+  .photo{
+    height:108mm;background:#fff;display:flex;align-items:center;justify-content:center;
+    overflow:hidden;
+  }
+  .photo img{width:100%;height:100%;object-fit:cover;object-position:center;}
+  .photo .placeholder{color:#bcbcbc;font-size:14px;}
+
+  .name{
+    background:var(--name-band);text-align:center;padding:6mm 6mm 7mm;
+    border:3px solid #2f6b41;margin:0;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  .name span{
+    font-family:"Caveat",cursive;font-size:54px;line-height:1;color:var(--name-text);
+    font-weight:700;
+  }
+
+  .details{padding:5mm 7mm 3mm;}
+  .row{
+    display:flex;gap:10px;padding:7px 0;border-bottom:1px solid #eef2f2;font-size:15px;
+  }
+  .row:last-child{border-bottom:none;}
+  .row .k{font-weight:700;min-width:42mm;}
+  .row .v{color:#3a3b3d;}
+
+  .bio{
+    background:var(--bio-bg);color:var(--ink);margin:4mm 0 0;padding:6mm 7mm;
+    font-size:14px;line-height:1.5;flex:0 0 auto;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  .bio p{margin:0 0 8px;}
+  .bio p:last-child{margin-bottom:0;}
+
+  .footer{
+    margin-top:auto;padding:5mm 7mm 6mm;font-size:13px;line-height:1.5;
+  }
+  .footer .support{color:var(--bio-text);font-style:italic;font-weight:500;}
+  .footer .email{font-style:italic;}
+  .footer a{color:inherit;text-decoration:none;}
+
+  /* ---- Print ---- */
+  @page{size:A4 portrait;margin:0;}
+  @media print{
+    body{background:#fff;}
+    .toolbar,.stage{padding:0;}
+    .toolbar{display:none;}
+    .card{box-shadow:none;margin:0;width:210mm;height:297mm;}
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <h1>SI<span>MA</span>BO · Animal Cards</h1>
+  <select id="picker" aria-label="Choose an animal"><option>Loading…</option></select>
+  <button id="printBtn" type="button" disabled>Print / Save PDF</button>
+  <span class="meta" id="meta">Loading animals…</span>
+</div>
+
+<div class="stage">
+  <div class="card" id="card">
+    <div class="sheet">
+      <div class="logo">
+        <img src="https://simabo.org/wp-content/uploads/2019/08/simabo-logo-white-shadow-1.png" alt="Simabo">
+      </div>
+      <div class="photo" id="photo"><span class="placeholder">—</span></div>
+      <div class="name"><span id="name">—</span></div>
+      <div class="details" id="details"></div>
+      <div class="bio" id="bio" hidden></div>
+      <div class="footer">
+        <div class="support" id="support"></div>
+        <div class="email">Send an email to <a href="mailto:info@simabo.org">info@simabo.org</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // Live data source — the WordPress REST endpoint (see wp-endpoint.php).
+  const ENDPOINT = "https://simabo.org/wp-json/simabo/v1/animals";
+
+  const picker  = document.getElementById('picker');
+  const meta    = document.getElementById('meta');
+  const printBtn= document.getElementById('printBtn');
+  let DATA = [];
+
+  function esc(s){
+    return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  }
+  function row(k,v){
+    if(!v) return '';
+    return `<div class="row"><div class="k">${k}</div><div class="v">${esc(v)}</div></div>`;
+  }
+
+  function render(a){
+    if(!a) return;
+    document.getElementById('name').textContent = a.name || '—';
+
+    const photo=document.getElementById('photo');
+    photo.innerHTML = a.image
+      ? `<img src="${esc(a.image)}" alt="${esc(a.name)}">`
+      : `<span class="placeholder">No photo</span>`;
+
+    document.getElementById('details').innerHTML =
+      row('Type:', a.species) +
+      row('Sex:', a.sex) +
+      row('Date of birth:', a.birth) +
+      row('Size:', a.size) +
+      row('Status:', a.status);
+
+    const bio=document.getElementById('bio');
+    if(a.bio){
+      bio.hidden=false;
+      bio.innerHTML = String(a.bio).split(/\n+/).filter(Boolean).map(p=>`<p>${esc(p)}</p>`).join('');
+    } else { bio.hidden=true; bio.innerHTML=''; }
+
+    const link=a.link||'';
+    document.getElementById('support').innerHTML =
+      link ? `Support ${esc(a.name)}: <a href="${esc(link)}">${esc(link)}</a>` : '';
+  }
+
+  function fillPicker(){
+    picker.innerHTML='';
+    DATA.forEach((a,i)=>{
+      const o=document.createElement('option');
+      o.value=i; o.textContent=a.species ? `${a.name} · ${a.species}` : a.name;
+      picker.appendChild(o);
+    });
+  }
+
+  async function load(){
+    try{
+      const res = await fetch(ENDPOINT, {cache:'no-store'});
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const json = await res.json();
+      DATA = Array.isArray(json) ? json : (json.animals || []);
+      if(!DATA.length) throw new Error('empty response');
+      DATA.sort((a,b)=>(a.name||'').toLowerCase().localeCompare((b.name||'').toLowerCase()));
+      fillPicker();
+      printBtn.disabled=false;
+      meta.classList.remove('error');
+      meta.textContent = `${DATA.length} animals · live`;
+      render(DATA[0]);
+    }catch(err){
+      meta.classList.add('error');
+      meta.textContent = `Could not load data (${err.message}). Is the WordPress endpoint installed?`;
+      picker.innerHTML='<option>—</option>';
+    }
+  }
+
+  picker.addEventListener('change', ()=> render(DATA[picker.value]));
+  printBtn.addEventListener('click', ()=> window.print());
+  load();
+})();
+</script>
+</body>
+</html>
