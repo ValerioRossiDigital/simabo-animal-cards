@@ -157,6 +157,7 @@
   function esc(s){
     return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   }
+  function cap(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
   function row(k,v){
     if(!v) return '';
     return `<div class="row"><div class="k">${k}</div><div class="v">${esc(v)}</div></div>`;
@@ -173,7 +174,7 @@
 
     document.getElementById('details').innerHTML =
       row('Type:', a.species) +
-      row('Sex:', a.sex) +
+      row('Sex:', cap(a.sex)) +
       row('Date of birth:', a.birth) +
       row('Size:', a.size) +
       row('Status:', a.status);
