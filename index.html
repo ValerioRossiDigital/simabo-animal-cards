@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js" integrity="sha384-8FWZA6BGMXhsfO+BLtrJK0We6gg5o1JyO8xQm6peWDEUs17ACA5ziE/NIAkl9z2k" crossorigin="anonymous"></script>
 <style>
   :root{
     --teal:#5FB6B1; --teal-deep:#2f8a84; --teal-ink:#1f5f5b;
@@ -34,14 +35,16 @@
   /* ====== A4 CARD ====== */
   .page{width:210mm;height:297mm;background:var(--teal);padding:6mm;
     -webkit-print-color-adjust:exact;print-color-adjust:exact;box-shadow:0 18px 50px rgba(31,95,91,.28);}
-  .card{background:var(--paper);height:100%;border-radius:4mm;overflow:hidden;
-    display:flex;flex-direction:column;position:relative;}
+  .card{background:var(--teal);height:100%;overflow:hidden;
+    display:flex;flex-direction:column;position:relative;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .inner{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;
+    background:var(--paper);border-radius:2mm;overflow:hidden;}
 
   .brand{background:var(--teal);display:flex;align-items:center;justify-content:space-between;
-    padding:5mm 8mm;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  .brand img{height:9mm;width:auto;}
+    padding:0 8mm 3.5mm;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .brand img{height:11mm;width:auto;}
   .pill{font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;
-    background:var(--gold);color:#3b2c00;padding:5px 14px;border-radius:999px;
+    background:var(--gold);color:#fff;padding:5px 14px;border-radius:999px;
     -webkit-print-color-adjust:exact;print-color-adjust:exact;}
 
   .portrait{background:var(--mist);flex:0 0 auto;height:112mm;display:flex;align-items:center;justify-content:center;
@@ -61,16 +64,19 @@
   .meta dt{font-size:10.5px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--teal-deep);margin:0 0 1.5mm;}
   .meta dd{margin:0;font-size:16px;font-weight:600;color:var(--ink);}
 
-  .story{padding:4mm 8mm 5mm;flex:1 1 auto;font-size:13.5px;line-height:1.62;color:#33403e;}
+  .story{padding:4mm 8mm 16mm;flex:1 1 auto;font-size:13.5px;line-height:1.62;color:#33403e;}
   .story p{margin:0 0 9px;}
   .story p:last-child{margin-bottom:0;}
 
   .cta{margin-top:auto;background:var(--teal);color:#fff;display:flex;align-items:center;
-    gap:3mm;padding:4mm 8mm;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  .cta .heart{font-size:18px;color:var(--coral);line-height:1;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  .cta .lead{font-family:"Lato",sans-serif;font-weight:700;font-size:15px;line-height:1.1;}
-  .cta .url{font-size:11.5px;color:rgba(255,255,255,.88);letter-spacing:.2px;margin-left:1mm;}
+    position:relative;padding:7mm 44mm 5mm 0;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .cta .url{font-size:13px;color:rgba(255,255,255,.92);letter-spacing:.2px;word-break:break-all;}
   .cta a{color:inherit;text-decoration:none;}
+  .qr{position:absolute;right:8mm;bottom:100%;transform:translateY(50%);z-index:2;
+    width:30mm;height:30mm;background:#fff;border:1px solid rgba(0,0,0,.10);border-radius:2mm;padding:2mm;
+    box-shadow:0 3px 12px rgba(31,95,91,.35);display:flex;align-items:center;justify-content:center;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .qr svg{width:100%;height:100%;display:block;}
 
   @page{size:A4 portrait;margin:0;}
   @media print{
@@ -79,6 +85,7 @@
     .stage{padding:0;}
     .page{box-shadow:none;margin:0;width:210mm;height:297mm;}
     .portrait img{box-shadow:none;border:1px solid #e4efee;}
+    .qr{box-shadow:none;}
   }
 </style>
 </head>
@@ -88,6 +95,7 @@
   <select id="statusFilter" aria-label="Filter by status"></select>
   <select id="picker" aria-label="Choose an animal"><option>Loading…</option></select>
   <button id="printBtn" type="button" disabled>Print / Save PDF</button>
+  <button id="qrBtn" type="button" disabled>Download QR</button>
   <span class="meta" id="meta">Loading animals…</span>
 </div>
 
@@ -98,17 +106,18 @@
         <img src="https://simabo.org/wp-content/uploads/2019/08/simabo-logo-white-shadow-1.png" alt="Simabo">
         <span class="pill" id="species" hidden></span>
       </header>
-      <div class="portrait" id="portrait"><span class="ph">—</span></div>
-      <section class="ident">
-        <h1 class="name" id="name">—</h1>
-        <div class="rule"></div>
-        <dl class="meta" id="meta-grid"></dl>
-      </section>
-      <section class="story" id="story"></section>
+      <div class="inner">
+        <div class="portrait" id="portrait"><span class="ph">—</span></div>
+        <section class="ident">
+          <h1 class="name" id="name">—</h1>
+          <div class="rule"></div>
+          <dl class="meta" id="meta-grid"></dl>
+        </section>
+        <section class="story" id="story"></section>
+      </div>
       <footer class="cta">
-        <span class="heart">&#9829;</span>
-        <span class="lead" id="lead">Sponsor me</span>
         <a class="url" id="url" href="#"></a>
+        <div class="qr" id="qr" aria-hidden="true" hidden></div>
       </footer>
     </div>
   </div>
@@ -121,7 +130,8 @@
   const statusFilter=document.getElementById('statusFilter');
   const meta=document.getElementById('meta');
   const printBtn=document.getElementById('printBtn');
-  let DATA=[], VIEW=[];
+  const qrBtn=document.getElementById('qrBtn');
+  let DATA=[], VIEW=[], current=null;
 
   function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
   function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
@@ -129,17 +139,18 @@
   function statusesOf(a){return a.status?String(a.status).split(/,\s*/).filter(Boolean):[];}
 
   function fit(){
-    const card=document.querySelector('.card');
+    const box=document.querySelector('.inner');
     const story=document.getElementById('story');
     let size=13.5; story.style.fontSize=size+'px';
     let guard=0;
-    while(card.scrollHeight>card.clientHeight+1 && size>9 && guard<50){
+    while(box.scrollHeight>box.clientHeight+1 && size>9 && guard<50){
       size-=0.5; story.style.fontSize=size+'px'; guard++;
     }
   }
 
   function render(a){
     if(!a) return;
+    current=a;
     document.getElementById('name').textContent=a.name||'—';
     const sp=document.getElementById('species');
     if(a.species){sp.hidden=false;sp.textContent=a.species;} else sp.hidden=true;
@@ -149,12 +160,36 @@
       cell('Sex',a.sex)+cell('Born',a.birth)+cell('Size',a.size)+cell('Status',a.status);
     const story=document.getElementById('story');
     story.innerHTML=a.bio?String(a.bio).split(/\n+/).filter(Boolean).map(p=>`<p>${esc(p)}</p>`).join(''):'';
-    const name=a.name||'this animal';
-    document.getElementById('lead').textContent=`Sponsor ${name}`;
     const url=document.getElementById('url');
-    if(a.link){url.href=a.link;url.textContent=a.link.replace(/^https?:\/\//,'');}
+    if(a.link){url.href=a.link;url.textContent=a.link;}
     else{url.textContent='';url.removeAttribute('href');}
+    const qrBox=document.getElementById('qr');
+    if(a.link && window.qrcode){
+      const qr=qrcode(0,'M'); qr.addData(a.link); qr.make();
+      qrBox.innerHTML=qr.createSvgTag({cellSize:2,margin:0}); qrBox.hidden=false;
+    } else { qrBox.innerHTML=''; qrBox.hidden=true; }
+    if(qrBtn) qrBtn.disabled=!(a.link && window.qrcode);
     fit();
+  }
+
+  // Build a high-res PNG of the current animal's QR and download it.
+  function downloadQR(){
+    if(!current || !current.link || !window.qrcode) return;
+    const qr=qrcode(0,'M'); qr.addData(current.link); qr.make();
+    const n=qr.getModuleCount(), margin=4, scale=Math.ceil(600/(n+margin*2));
+    const size=(n+margin*2)*scale;
+    const cv=document.createElement('canvas'); cv.width=cv.height=size;
+    const ctx=cv.getContext('2d');
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,size,size);
+    ctx.fillStyle='#000';
+    for(let r=0;r<n;r++)for(let c=0;c<n;c++)
+      if(qr.isDark(r,c)) ctx.fillRect((c+margin)*scale,(r+margin)*scale,scale,scale);
+    cv.toBlob(b=>{
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(b);
+      a.download='simabo-qr-'+(current.slug||'animal')+'.png';
+      a.click(); URL.revokeObjectURL(a.href);
+    },'image/png');
   }
 
   function fillStatusFilter(){
@@ -203,6 +238,7 @@
   statusFilter.addEventListener('change',applyFilter);
   picker.addEventListener('change',()=>render(VIEW[picker.value]));
   printBtn.addEventListener('click',()=>window.print());
+  qrBtn.addEventListener('click',downloadQR);
   window.addEventListener('beforeprint',fit);
   load();
 })();

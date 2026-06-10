@@ -39,14 +39,18 @@ WordPress page  /animal-cards         GitHub Pages  index.html
 ## The card
 
 A4 portrait, one animal per page. Teal frame, white logo, gold accents.
-Brand fonts: **Lato** (name) + **Roboto** (body). Shows photo (`contain`),
-species pill, name, a meta grid (Sex · Born · Size · Status), the bio, and a
-teal "Sponsor {name}" footer with the animal's page URL.
+Brand fonts: **Lato** (name) + **Roboto** (body). The portrait, identity and bio
+sit in a white rounded panel; below it a teal footer shows the animal's page URL
+with a **QR code** (linking to that page) straddling the panel/footer edge.
 
 - The toolbar has a **status filter** (e.g. *Ready for EU*, *Adopted abroad*,
   *(no status)*) that scopes the animal dropdown. Animals with several status
   terms appear under each.
 - JS **auto-fit** shrinks the bio text so every card stays on **one page**.
+- The **QR code** is generated client-side (static, encodes the animal's page
+  URL) — deterministic, so it never changes unless the URL does, and needs no
+  external service. The toolbar's **Download QR** button exports it as a
+  high-res PNG (`simabo-qr-{slug}.png`) for reuse on social/flyers.
 
 ## One-time setup / updating (developer)
 
